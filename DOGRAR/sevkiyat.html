@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sevkiyat Kayıt Sistemi</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f9f9f9;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      width: 80%;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    .form-container {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin: 10px 0 5px;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 8px;
+      margin: 5px 0;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+      background-color: #fff;
+    }
+
+    th, td {
+      padding: 10px;
+      text-align: left;
+      border: 1px solid #ddd;
+    }
+
+    th {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+
+    .note {
+      font-size: 12px;
+      color: #777;
+    }
+
+    .delete-btn {
+      background-color: #f44336;
+      color: white;
+      padding: 5px 10px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .delete-btn:hover {
+      background-color: #e53935;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Sevkiyat Kayıt Sistemi</h1>
+
+    <!-- Veri Giriş Formu -->
+    <div class="form-container">
+      <form id="recordForm">
+        <label for="customerName">Müşteri İsmi (Harf):</label>
+        <input type="text" id="customerName" required>
+
+        <label for="fileCode">Dosya Kodu (Sayı):</label>
+        <input type="number" id="fileCode" required>
+
+        <label for="thickness">Et Kalınlığı (Sayı):</label>
+        <input type="number" id="thickness" required>
+
+        <label for="partName">Parça İsmi (Sayı, Harf, İşaret):</label>
+        <input type="text" id="partName" required>
+
+        <label for="quantity">Adet:</label>
+        <input type="number" id="quantity" required>
+
+        <label for="description">Açıklama:</label>
+        <textarea id="description" rows="4"></textarea>
+
+        <label for="note">Not:</label>
+        <textarea id="note" rows="4"></textarea>
+
+        <button type="submit">Kaydet</button>
+      </form>
+    </div>
+
+    <!-- Kayıtların Görüntülenmesi -->
+    <h2>Kaydedilen Kayıtlar</h2>
+    <table id="recordTable">
+      <thead>
+        <tr>
+          <th>Tarih ve Saat</th>
+          <th>Müşteri İsmi</th>
+          <th>Dosya Kodu</th>
+          <th>Et Kalınlığı</th>
+          <th>Parça İsmi</th>
+          <th>Adet</th>
+          <th>Açıklama</th>
+          <th>Not</th>
+          <th>Sil</th> <!-- Silme butonu ekledik -->
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Veriler burada görüntülenecek -->
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    // Veri kayıtları için dizi
+    let records = JSON.parse(localStorage.getItem('records')) || [];
+
+    // Veriyi kaydet ve tabloyu güncelle
+    function saveRecord(event) {
+      event.preventDefault();
+
+      // Formdan verileri al
+      const customerName = document.getElementById('customerName').value;
+      const fileCode = document.getElementById('fileCode').value;
+      const thickness = document.getElementById('thickness').value;
+      const partName = document.getElementById('partName').value;
+      const quantity = document.getElementById('quantity').value;
+      const description = document.getElementById('description').value;
+      const note = document.getElementById('note').value;
+
+      // Tarih ve saat bilgisini al
+      const date = new Date();
+      const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+
+      // Yeni kaydı oluştur
+      const newRecord = {
+        date: formattedDate,
+        customerName,
+        fileCode,
+        thickness,
+        partName,
+        quantity,
+        description,
+        note
+      };
+
+      // Kaydı kaydet ve listeye ekle
+      records.push(newRecord);
+      localStorage.setItem('records', JSON.stringify(records));
+
+      // Formu temizle
+      document.getElementById('recordForm').reset();
+
+      // Tabloyu güncelle
+      displayRecords();
+    }
+
+    // Verileri tabloya ekle
+    function displayRecords() {
+      const tableBody = document.querySelector('#recordTable tbody');
+      tableBody.innerHTML = ''; // Mevcut verileri temizle
+
+      records.forEach((record, index) => {
+        const row = document.createElement('tr');
+
+        // Satır hücreleri
+        row.innerHTML = `
+          <td>${record.date}</td>
+          <td>${record.customerName}</td>
+          <td>${record.fileCode}</td>
+          <td>${record.thickness}</td>
+          <td>${record.partName}</td>
+          <td>${record.quantity}</td>
+          <td>${record.description}</td>
+          <td>${record.note}</td>
+          <td><button class="delete-btn" onclick="deleteRecord(${index})">Sil</button></td>
+        `;
+
+        tableBody.appendChild(row);
+      });
+    }
+
+    // Kaydı silme fonksiyonu
+    function deleteRecord(index) {
+      // Kayıt dizisinden sil
+      records.splice(index, 1);
+
+      // LocalStorage'a kaydedilen veriyi güncelle
+      localStorage.setItem('records', JSON.stringify(records));
+
+      // Tabloyu tekrar güncelle
+      displayRecords();
+    }
+
+    // Sayfa yüklendiğinde mevcut kayıtları tabloya yerleştir
+    window.onload = displayRecords;
+
+    // Formu kaydetme
+    document.getElementById('recordForm').addEventListener('submit', saveRecord);
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Büküm Bölümü</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      padding: 20px;
+    }
+
+    label, input, button {
+      display: block;
+      margin: 10px 0;
+      padding: 10px;
+      width: 100%;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+    }
+
+    button {
+      background-color: #4CAF50;
+      color: white;
+      cursor: pointer;
+      width: 200px;
+      margin: 10px auto;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Büküm Bölümü</h2>
+
+    <label for="customerName">Müşteri İsmi:</label>
+    <input type="text" id="customerName" placeholder="Müşteri İsmi" />
+
+    <label for="fileNumber">Dosya Kodu:</label>
+    <input type="text" id="fileNumber" placeholder="Dosya Kodu" />
+
+    <label for="fileUpload">Excel Dosyasını Yükle:</label>
+    <input type="file" id="fileUpload" />
+
+    <button onclick="saveData()">Kaydet</button>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.1/xlsx.full.min.js"></script>
+  <script>
+    function saveData() {
+      const customerName = document.getElementById('customerName').value;
+      const fileNumber = document.getElementById('fileNumber').value;
+      const fileInput = document.getElementById('fileUpload');
+      const file = fileInput.files[0];
+
+      if (!file) {
+        alert('Lütfen bir Excel dosyası yükleyin');
+        return;
+      }
+
+      // Excel dosyasını okuma işlemi
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+
+        // İlk sayfayı al
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+        // Kaydedilen veriyi localStorage'a aktar
+        const excelData = jsonData.slice(1); // İlk satır başlık olduğu için onu almayalım
+        localStorage.setItem('excelData', JSON.stringify(excelData));
+
+        // Yönlendirme işlemi
+        window.location.href = 'panel.html';
+      };
+
+      reader.readAsArrayBuffer(file);
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel - Büküm İşlemi</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      padding: 20px;
+    }
+
+    h2 {
+      font-size: 24px;
+      color: #333;
+    }
+
+    .panel-content {
+      margin-top: 20px;
+    }
+
+    .panel-content div {
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      margin-bottom: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .panel-content div:hover {
+      background-color: #e6f7e6;
+    }
+
+    .panel-content div p {
+      margin: 0;
+      font-size: 16px;
+    }
+
+    .panel-content div input[type="checkbox"] {
+      margin-left: 10px;
+    }
+
+    button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Büküm İşlemine Başla</h2>
+    <p>Burada işleminiz devam ediyor. Aşağıdaki kutucukları işaretleyerek tamamlayabilirsiniz.</p>
+
+    <div class="panel-content" id="panelContent">
+      <!-- Filtrelenmiş veriler burada listelenecek -->
+    </div>
+
+    <button onclick="saveProgress()">Kaydet ve Kapan</button>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.1/xlsx.full.min.js"></script>
+  <script>
+    let panelContent = document.getElementById('panelContent');
+
+    // Excel verisini almak için LocalStorage'dan al
+    let excelData = JSON.parse(localStorage.getItem('excelData'));
+
+    // Filtreleme işlemi için gerekli açıklama türlerini belirleyelim
+    const filterKeywords = ['KIVIRMA', 'SSK', 'SİLİNDİR'];
+
+    // Excel verisini filtrele ve sadece ilgili satırları listele
+    function displayFilteredData() {
+      // Excel verisinde her satırdaki açıklama sütununda KIVIRMA, SSK, SİLİNDİR olanları al
+      excelData.forEach(row => {
+        let description = row[4]; // Açıklama sütunu
+
+        // Eğer açıklama sütunu belirtilen anahtar kelimeleri içeriyorsa
+        if (description && filterKeywords.some(keyword => description.toUpperCase().includes(keyword))) {
+          let div = document.createElement('div');
+          div.innerHTML = `
+            <div>
+              <p><strong>Kalınlık:</strong> ${row[0]} <strong>Parça Adı:</strong> ${row[1]} <strong>Adet:</strong> ${row[2]}</p>
+              <label>
+                <input type="checkbox" id="finished-${row[1]}" />
+                Bitti
+              </label>
+            </div>
+          `;
+          panelContent.appendChild(div);
+        }
+      });
+    }
+
+    // Filtrelenmiş verileri göster
+    displayFilteredData();
+
+    // İşlem tamamlandığında kaydet
+    function saveProgress() {
+      let checkboxes = document.querySelectorAll('input[type="checkbox"]');
+      let completedCount = 0;
+      checkboxes.forEach(checkbox => {
+        if (checkbox.checked) completedCount++;
+      });
+
+      alert(`İşlem tamamlandı. ${completedCount} parça bitirildi.`);
+      // Paneli kapatabiliriz
+      window.close(); // Paneli kapatma
+    }
+  </script>
+
+</body>
+</html>
